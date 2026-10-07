@@ -157,6 +157,3 @@ release/
 # Vite
 .vite/
 *.local
-
-# Screenshots (scripts/shots.js)
-.shots/

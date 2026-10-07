@@ -1,0 +1,36 @@
+appId: com.jsonpretty.app
+productName: JsonPretty
+copyright: Copyright © 2025
+
+directories:
+  output: release
+  buildResources: build
+
+# В сборку попадает только то, что нужно в рантайме (никаких src/, node_modules dev-части и т.д.)
+files:
+  - electron/**
+  - dist/**
+  - package.json
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-${arch}-setup.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: JsonPretty
+
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
