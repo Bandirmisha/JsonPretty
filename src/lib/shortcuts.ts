@@ -14,7 +14,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
         title: 'Ввод',
         items: [
             { keys: ['"'], description: 'На выделении — обернуть его в кавычки' },
-            { keys: ['Ctrl', 'X'], description: 'Без выделения — вырезать строку с курсором вместе с переводом строки'},
+            { keys: ['Ctrl', 'X'], description: 'Без выделения — вырезать строку'},
             { keys: ['Ctrl', 'Z'], description: 'Отменить последнюю правку' }
         ]
     },
