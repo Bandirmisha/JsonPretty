@@ -1,4 +1,9 @@
-const { clipboard, ipcMain } = require('electron')
+const { clipboard, ipcMain, BrowserWindow } = require('electron')
+
+/** Окно ищем от отправителя: хендлеры не зависят от того, кто создал окно (приложение или тест) */
+function senderWindow(event) {
+    return BrowserWindow.fromWebContents(event.sender)
+}
 
 /**
  * IPC-хендлеры главного процесса. Вынесены отдельно, чтобы смоук-тест
@@ -16,6 +21,34 @@ function registerIpcHandlers() {
     })
 
     ipcMain.handle('clipboard:read', () => clipboard.readText())
+
+    // Управление окном из собственной полосы заголовка (окно создаётся с frame: false).
+    // Минимум/разворот/закрытие — события без ответа, это действия, а не запросы.
+    ipcMain.on('window:minimize', (event) => senderWindow(event)?.minimize())
+
+    ipcMain.on('window:toggle-maximize', (event) => {
+        const win = senderWindow(event)
+        if (!win) return
+        if (win.isMaximized()) win.unmaximize()
+        else win.maximize()
+    })
+
+    ipcMain.on('window:close', (event) => senderWindow(event)?.close())
+
+    ipcMain.handle('window:is-maximized', (event) => senderWindow(event)?.isMaximized() ?? false)
 }
 
-module.exports = { registerIpcHandlers }
+/**
+ * Окно может развернуться и помимо нашей кнопки (двойной клик по полосе, Win+стрелка,
+ * перетаскивание к краю экрана), поэтому о состоянии сообщает сам главный процесс.
+ */
+function watchWindowState(win) {
+    const send = () => {
+        if (!win.isDestroyed()) win.webContents.send('window:maximized-changed', win.isMaximized())
+    }
+
+    win.on('maximize', send)
+    win.on('unmaximize', send)
+}
+
+module.exports = { registerIpcHandlers, watchWindowState }

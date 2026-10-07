@@ -488,6 +488,69 @@ main {
 
 .spacer { margin-left: auto; }
 
+/* ---------- Своя полоса заголовка ----------
+   Окно создаётся без системной рамки (frame: false), поэтому полосу,
+   перетаскивание и кнопки управления рисует приложение.
+*/
+
+.title-bar {
+    flex: 0 0 auto;
+    position: relative;
+    /* Выше затемнения окна «Справка»: при открытом диалоге окно всё ещё можно перетащить и закрыть */
+    z-index: 200;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 6px 0 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    /* Вся полоса — зона перетаскивания окна; кнопки её отключают */
+    -webkit-app-region: drag;
+}
+
+.title-mark {
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+}
+
+.title-text {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--muted);
+}
+
+.title-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    -webkit-app-region: no-drag;
+}
+
+.title-btn {
+    width: 34px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: var(--muted);
+    background: var(--panel-2);
+}
+
+.title-btn:hover:not(:disabled) { color: var(--text); }
+
+/* Красным подсвечивается только закрытие — как в системной полосе Windows */
+.title-btn-close:hover:not(:disabled) {
+    background: var(--err);
+    border-color: var(--err);
+    color: #ffffff;
+}
+
 /* ---------- Панели ввода/вывода ---------- */
 
 .pane {

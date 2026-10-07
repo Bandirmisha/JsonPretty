@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
-const { registerIpcHandlers } = require('./ipc')
+const { registerIpcHandlers, watchWindowState } = require('./ipc')
 
 // Задаётся только скриптом `npm run dev`. В обычном запуске и в собранном .exe
 // загружается статика из dist/.
@@ -15,6 +15,10 @@ const createWindow = () => {
         backgroundColor: '#1e1f26',
         title: 'JsonPretty',
         show: false,
+        // Системная полоса заголовка не нужна: её рисует TitleBar.tsx.
+        // thickFrame оставлен по умолчанию (true) — иначе окно без рамки
+        // теряет возможность менять размер за края.
+        frame: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -25,6 +29,7 @@ const createWindow = () => {
 
     win.once('ready-to-show', () => win.show())
     win.setMenuBarVisibility(false)
+    watchWindowState(win)
 
     if (devServerUrl) {
         win.loadURL(devServerUrl)

@@ -5,6 +5,7 @@ import InputPane from './components/InputPane'
 import LogPanel, { type LogAction, type LogEntry } from './components/LogPanel'
 import OutputPane, { type OutputState } from './components/OutputPane'
 import ThemeSelect from './components/ThemeSelect'
+import TitleBar from './components/TitleBar'
 import { CircleHelp } from 'lucide-react'
 import { parseLoose, stringifyJson } from './lib/parseLoose'
 import { templateText } from './lib/template'
@@ -103,6 +104,8 @@ export default function App() {
 
     return (
         <>
+            <TitleBar />
+
             <main>
                 <InputPane
                     value={input}
