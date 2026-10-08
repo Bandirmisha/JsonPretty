@@ -9,6 +9,7 @@ type Props = {
 
 export default function HelpDialog({ open, onClose }: Props) {
     const closeRef = useRef<HTMLButtonElement>(null)
+    const dialogRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (!open) return
@@ -19,6 +20,21 @@ export default function HelpDialog({ open, onClose }: Props) {
             if (event.key === 'Escape') {
                 event.preventDefault()
                 onClose()
+                return
+            }
+
+            // Фокус не уходит за пределы окна: Tab циклично обходит его элементы
+            if (event.key === 'Tab') {
+                const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                )
+                if (!focusables || focusables.length === 0) return
+
+                event.preventDefault()
+                const list = [...focusables]
+                const current = list.indexOf(document.activeElement as HTMLElement)
+                const step = event.shiftKey ? -1 : 1
+                list[(current + step + list.length) % list.length].focus()
             }
         }
 
@@ -35,6 +51,7 @@ export default function HelpDialog({ open, onClose }: Props) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Справка"
+                ref={dialogRef}
                 onClick={(event) => event.stopPropagation()}
             >
                 <div className="help-head">

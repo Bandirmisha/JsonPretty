@@ -14,8 +14,20 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
         title: 'Ввод',
         items: [
             { keys: ['"'], description: 'На выделении — обернуть его в кавычки' },
-            { keys: ['Ctrl', 'X'], description: 'Без выделения — вырезать строку'},
+            { keys: ['Tab'], description: 'Отступ в два пробела; на выделении — сдвинуть блок' },
+            { keys: ['Shift', 'Tab'], description: 'Убрать отступ' },
+            { keys: ['Enter'], description: 'Новая строка с автоотступом; между скобками — развернуть блок' },
+            { keys: ['Ctrl', 'X'], description: 'Без выделения — вырезать строку' },
             { keys: ['Ctrl', 'Z'], description: 'Отменить последнюю правку' }
+        ]
+    },
+    {
+        title: 'Мультикурсор и сворачивание',
+        items: [
+            { keys: ['Ctrl', 'D'], description: 'Выделить следующее вхождение того же текста' },
+            { keys: ['Alt', 'клик'], description: 'Добавить ещё одну каретку' },
+            { keys: ['Ctrl', 'Shift', '['], description: 'Свернуть блок JSON' },
+            { keys: ['Ctrl', 'Shift', ']'], description: 'Развернуть блок JSON' }
         ]
     },
     {

@@ -27,6 +27,10 @@
     --null: #569cd6;
     --punct: #ffffff;
     --scroll: #52525a;
+    /* Выделение в редакторе — тон акцента темы, а не одна и та же голубая
+       заливка во всех темах */
+    --selection: color-mix(in srgb, var(--accent) 32%, transparent);
+    --selection-strong: color-mix(in srgb, var(--accent) 46%, transparent);
 }
 
 /* Visual Studio Light */
@@ -593,7 +597,7 @@ main {
     position: relative;
 }
 
-textarea, pre.output {
+pre.output {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -613,96 +617,10 @@ textarea, pre.output {
     tab-size: 4;
     user-select: text;
 }
-
-textarea::placeholder { color: var(--placeholder); }
-textarea:focus { background: var(--bg-focus); }
 
 pre.output { white-space: pre-wrap; word-break: break-word; }
 pre.output.empty { color: var(--placeholder); }
 pre.output.error-text { color: var(--err); white-space: pre-wrap; }
-
-/* ---------- Поле ввода с подсветкой ----------
-   Зеркальный слой: <pre> с подсветкой под полностью прозрачной textarea.
-   Шрифт, отступы, переносы и прокрутка у слоёв должны совпадать. */
-
-.input-wrap {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-}
-
-/* Нумерация строк: своя колонка, содержимое прокручивается вместе с текстом */
-.input-gutter {
-    overflow: hidden;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    padding: 14px 8px 0;
-    user-select: none;
-}
-
-.gutter-inner {
-    margin: 0;
-    font-family: Consolas, "Cascadia Mono", Menlo, monospace;
-    font-size: 13.5px;
-    line-height: 1.55;
-    color: var(--muted);
-    text-align: right;
-    white-space: pre;
-    will-change: transform;
-}
-
-.input-stack {
-    position: relative;
-    min-width: 0;
-}
-
-.input-mirror,
-.input-wrap textarea {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 14px 16px;
-    border: 0;
-    font-family: Consolas, "Cascadia Mono", Menlo, monospace;
-    font-size: 13.5px;
-    line-height: 1.55;
-    white-space: pre;
-    tab-size: 4;
-    overflow-wrap: normal;
-    word-break: normal;
-}
-
-.input-mirror {
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-    background: var(--bg);
-    color: var(--text);
-    user-select: none;
-}
-
-.input-wrap textarea {
-    z-index: 1;
-    overflow: auto;
-    background: transparent;
-    color: transparent;
-    caret-color: var(--text);
-    resize: none;
-    outline: none;
-    user-select: text;
-}
-
-.input-wrap textarea:focus { background: transparent; }
-
-/* полупрозрачное выделение, чтобы сквозь него была видна подсветка */
-.input-wrap textarea::selection {
-    background: rgba(110, 155, 230, .35);
-}
-
-.input-wrap:focus-within .input-mirror { background: var(--bg-focus); }
 
 /* ---------- Поиск по вводу ---------- */
 
@@ -742,10 +660,14 @@ pre.output.error-text { color: var(--err); white-space: pre-wrap; }
     font-variant-numeric: tabular-nums;
 }
 
-/* Пометки в зеркальном слое: совпадения поиска и парные скобки */
+/* Пометки: совпадения поиска и парные скобки */
 .j-mark { background: rgba(255, 205, 60, .28); }
 .j-mark-active { background: rgba(255, 165, 0, .55); }
-.j-bracket-match { background: rgba(110, 165, 255, .35); border-radius: 2px; }
+.cm-host .cm-matchingBracket {
+    background: rgba(110, 165, 255, .35);
+    border-radius: 2px;
+    outline: none;
+}
 
 /* ---------- Средняя колонка ---------- */
 
@@ -1161,3 +1083,126 @@ select optgroup { background: var(--panel); color: var(--text); }
     border-radius: 6px;
     border: 3px solid var(--panel);
 }
+
+/* ---------- Редактор CodeMirror ----------
+   Цвета токенов берутся из наших классов j-key, j-str и т.д., поэтому
+   темы менять не нужно: переменные те же. Здесь — только каркас и хром. */
+
+.cm-host {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.cm-host .cm-editor {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Consolas, "Cascadia Mono", Menlo, monospace;
+    font-size: 13.5px;
+}
+
+.cm-host .cm-editor.cm-focused {
+    outline: none;
+    background: var(--bg-focus);
+}
+
+.cm-host .cm-scroller {
+    font-family: inherit;
+    line-height: 1.55;
+    overflow: auto;
+}
+
+.cm-host .cm-content {
+    padding: 14px 16px;
+    caret-color: var(--text);
+}
+
+.cm-host .cm-line { padding: 0; }
+
+/* Гастер с номерами строк: колонка как была, отдельным фоном */
+.cm-host .cm-gutters {
+    background: var(--panel);
+    color: var(--muted);
+    border: 0;
+    border-right: 1px solid var(--border);
+    user-select: none;
+}
+
+.cm-host .cm-lineNumbers .cm-gutterElement {
+    padding: 0 8px 0 12px;
+    min-width: 34px;
+}
+
+/* Выделение: полупрозрачный акцент темы, чтобы сквозь него была видна подсветка.
+   !important — потому что базовая тема CodeMirror для сфокусированного редактора
+   задаёт свой цвет селектором с большей специфичностью и перебивает тему. */
+.cm-host .cm-content ::selection {
+    background: var(--selection);
+}
+
+.cm-host .cm-editor .cm-selectionLayer .cm-selectionBackground {
+    background: var(--selection) !important;
+}
+
+.cm-host .cm-editor.cm-focused .cm-selectionLayer .cm-selectionBackground {
+    background: var(--selection-strong) !important;
+}
+
+/* Каретка */
+.cm-host .cm-cursor,
+.cm-host .cm-dropCursor {
+    border-left-color: var(--text);
+    border-left-width: 2px;
+}
+
+/* Скроллбары как в остальном приложении */
+.cm-host .cm-scroller::-webkit-scrollbar { width: 11px; height: 11px; }
+.cm-host .cm-scroller::-webkit-scrollbar-thumb {
+    background: var(--scroll);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+.cm-host .cm-scroller::-webkit-scrollbar-track { background: transparent; }
+
+/* Сворачивание: иконка lucide в гаттере и плашка свёрнутого узла */
+.cm-host .cm-foldGutter .cm-gutterElement {
+    padding: 0 4px;
+    color: var(--muted);
+    line-height: 1;
+}
+
+.cm-host .cm-foldGutter .cm-gutterElement:hover { color: var(--text); }
+
+.cm-host .cm-fold-arrow {
+    display: inline-flex;
+    align-items: center;
+}
+
+.cm-host .cm-fold-arrow svg { display: block; }
+
+.cm-host .cm-foldPlaceholder {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 3px;
+    margin: 0 2px;
+    padding: 0 4px;
+    cursor: pointer;
+}
+
+/* Ошибка разбора JSON: красится номер строки, а в тексте — волнистое подчёркивание */
+.cm-host .cm-lineNumbers .cm-gutterElement.cm-error-line {
+    background: var(--err);
+    color: var(--bg);
+}
+
+.cm-host .cm-lintRange-error {
+    background-image: none;
+    text-decoration: underline wavy var(--err);
+    text-decoration-skip-ink: none;
+}
+
+/* Точку вместо подчёркивания не показываем */
+.cm-host .cm-lintPoint { display: none; }

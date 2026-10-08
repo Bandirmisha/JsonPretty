@@ -21,12 +21,3 @@ export function findMatches(text: string, query: string): Match[] {
 
     return matches
 }
-
-/** Номер строки (с нуля) для позиции — нужен, чтобы прокрутить поле к совпадению. */
-export function lineIndexAt(text: string, pos: number): number {
-    let line = 0
-    for (let i = 0; i < pos && i < text.length; i++) {
-        if (text[i] === '\n') line++
-    }
-    return line
-}

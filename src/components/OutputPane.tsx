@@ -1,5 +1,7 @@
-import { highlightJson } from '../lib/highlight'
+import { useMemo } from 'react'
+import { cmSetup } from '../lib/cmSetup'
 import type { JsonValue } from '../lib/parseLoose'
+import CodeEditor from './CodeEditor'
 import CopyButton from './CopyButton'
 
 export type OutputState =
@@ -10,8 +12,15 @@ type Props = {
     output: OutputState | null
 }
 
+/**
+ * Панель «Результат». Готовый JSON показываем в CodeMirror только для чтения:
+ * нужны подсветка и сворачивание, а правки и мультикурсор тут ни к чему.
+ * Пустое состояние и текст ошибки остаются обычным <pre> — так они и выглядели.
+ */
 export default function OutputPane({ output }: Props) {
     const isJson = output?.variant === 'json'
+    // Расширения собираем один раз: редактор создаётся тоже один раз
+    const extensions = useMemo(() => cmSetup({ readOnly: true }), [])
 
     return (
         <section className="pane">
@@ -29,7 +38,7 @@ export default function OutputPane({ output }: Props) {
                 {output === null ? (
                     <pre className="output empty">Здесь появится результат…</pre>
                 ) : output.variant === 'json' ? (
-                    <pre className="output">{highlightJson(output.text)}</pre>
+                    <CodeEditor className="cm-host" value={output.text} extensions={extensions} />
                 ) : (
                     <pre className="output error-text">{output.text}</pre>
                 )}

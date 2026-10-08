@@ -13,11 +13,11 @@ export default function ActionBar({ onPretty, onMinify, children }: Props) {
             <div className="center-actions">
                 <button id="prettyBtn" type="button" className="with-icon" onClick={onPretty}>
                     <Sparkles size={16} />
-                    Pretty
+                    Форматировать
                 </button>
                 <button type="button" className="with-icon" onClick={onMinify}>
                     <ChevronsDownUp size={16} />
-                    Minify
+                    Сократить
                 </button>
             </div>
 

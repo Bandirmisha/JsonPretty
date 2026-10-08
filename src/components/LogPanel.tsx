@@ -5,6 +5,12 @@ import CopyButton from './CopyButton'
 
 export type LogAction = 'Pretty' | 'Minify'
 
+/** Подписи действий для журнала: существительные, внутренние имена — латиницей. */
+const ACTION_LABELS: Record<LogAction, string> = {
+    Pretty: 'Форматирование',
+    Minify: 'Сокращение'
+}
+
 export type LogEntry = {
     id: number
     time: string
@@ -54,15 +60,15 @@ export default function LogPanel({ entries, open, onToggle, onClear }: Props) {
                 <div className="log-body" ref={bodyRef}>
                     {entries.length === 0 ? (
                         <div className="log-empty">
-                            Журнал пуст. Здесь появятся операции Pretty и Minify — с вводом и
-                            результатом.
+                            Журнал пуст. Здесь появятся операции «Форматирование» и «Сокращение» —
+                            с вводом и результатом.
                         </div>
                     ) : (
                         entries.map((entry) => (
                             <article className={`log-entry${entry.ok ? '' : ' err'}`} key={entry.id}>
                                 <div className="log-entry-head">
                                     <span className="t">{entry.time}</span>
-                                    <span className="badge action">{entry.action}</span>
+                                    <span className="badge action">{ACTION_LABELS[entry.action]}</span>
                                     <span className={`badge ${entry.ok ? 'ok' : 'err'}`}>
                                         {entry.ok ? 'OK' : 'Ошибка'}
                                     </span>
