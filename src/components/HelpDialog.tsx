@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { SHORTCUT_GROUPS } from '../lib/shortcuts'
 
@@ -58,8 +58,11 @@ export default function HelpDialog({ open, onClose }: Props) {
                             {group.items.map((item, index) => (
                                 <div className="help-row" key={`${group.title}-${index}`}>
                                     <span className="help-keys">
-                                        {item.keys.map((key) => (
-                                            <kbd key={key}>{key}</kbd>
+                                        {item.keys.map((key, index) => (
+                                            <Fragment key={key}>
+                                                {index > 0 && <span className="help-plus">+</span>}
+                                                <kbd>{key}</kbd>
+                                            </Fragment>
                                         ))}
                                     </span>
                                     <span className="help-text">{item.description}</span>
