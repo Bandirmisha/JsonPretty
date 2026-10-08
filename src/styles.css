@@ -1168,9 +1168,11 @@ select optgroup { background: var(--panel); color: var(--text); }
 
 /* Сворачивание: иконка lucide в гаттере и плашка свёрнутого узла */
 .cm-host .cm-foldGutter .cm-gutterElement {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0 4px;
     color: var(--muted);
-    line-height: 1;
 }
 
 .cm-host .cm-foldGutter .cm-gutterElement:hover { color: var(--text); }
