@@ -19,8 +19,13 @@ type Props = {
  */
 export default function OutputPane({ output }: Props) {
     const isJson = output?.variant === 'json'
-    // Расширения собираем один раз: редактор создаётся тоже один раз
-    const extensions = useMemo(() => cmSetup({ readOnly: true }), [])
+    // Расширения собираем один раз: редактор создаётся тоже один раз.
+    // В «Результате» нет номеров строк, зато длинные строки переносятся:
+    // горизонтальная прокрутка готового JSON только мешает читать
+    const extensions = useMemo(
+        () => cmSetup({ readOnly: true, lineNumbers: false, wrap: true }),
+        []
+    )
 
     return (
         <section className="pane">

@@ -26,8 +26,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
         items: [
             { keys: ['Ctrl', 'D'], description: 'Выделить следующее вхождение того же текста' },
             { keys: ['Alt', 'клик'], description: 'Добавить ещё одну каретку' },
-            { keys: ['Ctrl', 'Shift', '['], description: 'Свернуть блок JSON' },
-            { keys: ['Ctrl', 'Shift', ']'], description: 'Развернуть блок JSON' }
+            { keys: ['Средняя кнопка'], description: 'Протяжка — блочное выделение по столбцам'}
         ]
     },
     {

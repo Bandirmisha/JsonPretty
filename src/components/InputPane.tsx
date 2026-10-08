@@ -63,13 +63,15 @@ export default function InputPane({ value, onChange, onClear, onTemplate, suspen
             const safe = ((index % list.length) + list.length) % list.length
             setActiveIndex(safe)
 
+            // Фокус из строки поиска не забираем: совпадение выделяется и
+            // подкручивается без фокуса, а иначе после первого Enter он уходил бы
+            // в редактор и следующее нажатие уже не переключало совпадения
             const match = list[safe]
             view.dispatch({
                 selection: { anchor: match.start, head: match.end },
                 effects: setSearchHighlight.of({ query, active: safe }),
                 scrollIntoView: true
             })
-            view.focus()
         },
         [query]
     )

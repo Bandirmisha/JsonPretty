@@ -23,7 +23,10 @@ const createWindow = () => {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
             nodeIntegration: false,
-            sandbox: true
+            sandbox: true,
+            // Средняя кнопка мыши в редакторе — блочное выделение, а не автопрокрутка:
+            // выключаем встроенную в Chromium «кружок со стрелками» (на Windows она включена)
+            disableBlinkFeatures: 'MiddleClickAutoscroll'
         }
     })
 

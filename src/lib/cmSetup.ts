@@ -30,6 +30,7 @@ import {
     lineNumberMarkers,
     lineNumbers,
     placeholder as cmPlaceholder,
+    rectangularSelection,
     type DecorationSet,
     type ViewUpdate
 } from '@codemirror/view'
@@ -410,19 +411,64 @@ function foldArrow(open: boolean): HTMLElement {
     return arrow
 }
 
+/* ---------- Блочное (столбцовое) выделение ----------
+   Как в Rider и VS Code: зажатая средняя кнопка мыши и протяжка проставляют
+   каретки по вертикали, а движение вбок выделяет символы столбцом.
+   Alt+протяжка слева — то же самое, это поведение CodeMirror по умолчанию. */
+const rectangular = rectangularSelection({
+    eventFilter: (event) => event.button === 1 || (event.button === 0 && event.altKey)
+})
+
+/**
+ * Средняя кнопка в Chromium на Windows включает автопрокрутку (кружок со стрелками):
+ * она перехватывает протяжку и ломает блочное выделение. В приложении она выключена
+ * флагом MiddleClickAutoscroll, но обработчик нужен и сам по себе — он гасит действие
+ * по умолчанию, если приложение открыто в обычном браузере.
+ *
+ * Слушатель висит на корне редактора вручную, а не через EditorView.domEventHandlers:
+ * CodeMirror прерывает свою цепочку обработчиков, если действие события уже отменено,
+ * поэтому отменять его можно только после того, как выделение началось.
+ */
+const middleButtonGuard = ViewPlugin.fromClass(
+    class {
+        private readonly host: HTMLElement
+
+        private readonly onMouseDown = (event: MouseEvent) => {
+            if (event.button === 1) event.preventDefault()
+        }
+
+        constructor(view: EditorView) {
+            this.host = view.dom
+            this.host.addEventListener('mousedown', this.onMouseDown)
+        }
+
+        destroy() {
+            this.host.removeEventListener('mousedown', this.onMouseDown)
+        }
+    }
+)
+
 export type SetupOptions = {
     /** Панель только для чтения: результат, который нельзя править */
     readOnly?: boolean
+    /** Номера строк в гаттере. В «Результате» они не нужны */
+    lineNumbers?: boolean
+    /** Переносить длинные строки вместо горизонтальной прокрутки */
+    wrap?: boolean
     placeholder?: string
 }
 
 /** Общий набор расширений для обеих панелей */
-export function cmSetup({ readOnly, placeholder }: SetupOptions = {}): Extension[] {
+export function cmSetup({
+    readOnly,
+    lineNumbers: showLineNumbers = true,
+    wrap,
+    placeholder
+}: SetupOptions = {}): Extension[] {
     const extensions: Extension[] = [
         // Сначала номер строки, сразу справа от него — стрелка сворачивания
-        lineNumbers(),
+        ...(showLineNumbers ? [lineNumbers(), errorLines] : []),
         foldGutter({ markerDOM: foldArrow }),
-        errorLines,
         drawSelection(),
         // Мультикурсор: несколько выделений/кареток.
         // Alt+клик (как в VS Code) добавляет каретку; Ctrl/⌘+клик оставляем как
@@ -431,6 +477,9 @@ export function cmSetup({ readOnly, placeholder }: SetupOptions = {}): Extension
         EditorView.clickAddsSelectionRange.of(
             (event) => event.altKey || event.ctrlKey || event.metaKey
         ),
+        // Блочное выделение средней кнопкой мыши
+        rectangular,
+        middleButtonGuard,
         indentOnInput(),
         bracketMatching(),
         closeBrackets(),
@@ -453,6 +502,8 @@ export function cmSetup({ readOnly, placeholder }: SetupOptions = {}): Extension
         ]),
         EditorView.editable.of(!readOnly)
     ]
+
+    if (wrap) extensions.push(EditorView.lineWrapping)
 
     if (readOnly) {
         extensions.push(EditorState.readOnly.of(true))
