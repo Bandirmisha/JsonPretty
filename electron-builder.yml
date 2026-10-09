@@ -10,11 +10,28 @@ directories:
 files:
   - electron/**
   - dist/**
+  # Иконка окна: её читает главный процесс, поэтому она нужна и внутри asar
+  - src/assets/**
   - package.json
 
 asar: true
 
+# Локали Chromium: приложение показывает свой интерфейс, а каждый неиспользуемый
+# .pak — это ещё около мегабайта в сборке (все 55 языков занимают ~49 МБ).
+# "ru" — для родного языка диалогов Chromium и DevTools, "en-US" — запасной.
+electronLanguages:
+  - ru
+  - en-US
+
+# Архивы приложения сжимаем по максимуму
+compression: maximum
+
+# Нативных зависимостей в проекте нет — не тратим время на @electron/rebuild
+npmRebuild: false
+
 win:
+  # Иконка .exe и установщика: electron-builder сам делает из неё .ico
+  icon: src/assets/icon.png
   target:
     - target: nsis
       arch:

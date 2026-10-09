@@ -52,7 +52,9 @@ export default function LogPanel({ entries, open, onToggle, onClear }: Props) {
                 </button>
 
                 <div className="log-right">
-                    <ClearButton onClick={onClear} disabled={entries.length === 0} />
+                    {/* Очистка нужна, только пока журнал раскрыт: в свёрнутой полосе
+                        кнопка без дела сосёт внимание */}
+                    {open && <ClearButton onClick={onClear} disabled={entries.length === 0} />}
                 </div>
             </div>
 

@@ -453,6 +453,8 @@ export type SetupOptions = {
     readOnly?: boolean
     /** Номера строк в гаттере. В «Результате» они не нужны */
     lineNumbers?: boolean
+    /** Сворачивание блоков и стрелки в гаттере. В «Результате» не нужны */
+    fold?: boolean
     /** Переносить длинные строки вместо горизонтальной прокрутки */
     wrap?: boolean
     placeholder?: string
@@ -462,13 +464,14 @@ export type SetupOptions = {
 export function cmSetup({
     readOnly,
     lineNumbers: showLineNumbers = true,
+    fold = true,
     wrap,
     placeholder
 }: SetupOptions = {}): Extension[] {
     const extensions: Extension[] = [
         // Сначала номер строки, сразу справа от него — стрелка сворачивания
         ...(showLineNumbers ? [lineNumbers(), errorLines] : []),
-        foldGutter({ markerDOM: foldArrow }),
+        ...(fold ? [foldGutter({ markerDOM: foldArrow })] : []),
         drawSelection(),
         // Мультикурсор: несколько выделений/кареток.
         // Alt+клик (как в VS Code) добавляет каретку; Ctrl/⌘+клик оставляем как
@@ -496,7 +499,8 @@ export function cmSetup({
             // Backspace на отступе — стереть его целиком
             { key: 'Backspace', run: backspaceIndentCommand },
             ...closeBracketsKeymap,
-            ...foldKeymap,
+            // Сворачивание — только там, где есть стрелки в гаттере
+            ...(fold ? foldKeymap : []),
             ...historyKeymap,
             ...defaultKeymap
         ]),

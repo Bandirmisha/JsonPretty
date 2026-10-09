@@ -20,10 +20,10 @@ type Props = {
 export default function OutputPane({ output }: Props) {
     const isJson = output?.variant === 'json'
     // Расширения собираем один раз: редактор создаётся тоже один раз.
-    // В «Результате» нет номеров строк, зато длинные строки переносятся:
-    // горизонтальная прокрутка готового JSON только мешает читать
+    // В «Результате» нет номеров строк и сворачивания, зато длинные строки
+    // переносятся: горизонтальная прокрутка готового JSON только мешает читать
     const extensions = useMemo(
-        () => cmSetup({ readOnly: true, lineNumbers: false, wrap: true }),
+        () => cmSetup({ readOnly: true, lineNumbers: false, fold: false, wrap: true }),
         []
     )
 

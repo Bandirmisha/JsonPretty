@@ -19,6 +19,9 @@ const createWindow = () => {
         // thickFrame оставлен по умолчанию (true) — иначе окно без рамки
         // теряет возможность менять размер за края.
         frame: false,
+        // Иконка окна и панели задач — тот же файл, из которого electron-builder
+        // делает иконку .exe. В папке сборки он лежит внутри asar (см. files ниже)
+        icon: path.join(__dirname, '..', 'src', 'assets', 'icon.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,

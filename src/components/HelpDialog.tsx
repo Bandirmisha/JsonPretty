@@ -77,7 +77,9 @@ export default function HelpDialog({ open, onClose }: Props) {
                                     <span className="help-keys">
                                         {item.keys.map((key, index) => (
                                             <Fragment key={key}>
-                                                {index > 0 && <span className="help-plus">+</span>}
+                                                {index > 0 && (item.showPlus !== false
+                                                        ? <span className="help-plus">+</span> 
+                                                        : <span className="help-plus">,</span>)}
                                                 <kbd>{key}</kbd>
                                             </Fragment>
                                         ))}

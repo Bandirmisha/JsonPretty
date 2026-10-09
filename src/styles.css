@@ -777,10 +777,6 @@ button:disabled { opacity: .45; cursor: default; }
 
 .soft-btn:hover:not(:disabled) { background: var(--panel-3); }
 
-/* в шапке «Ввод» к правому краю уезжает кнопка шаблона, а счётчик прижат к ней */
-.pane-head .soft-btn { margin-left: auto; }
-.pane-head .soft-btn + .count { margin-left: 0; }
-
 /* ---------- Выбор темы ---------- */
 
 .theme-block {

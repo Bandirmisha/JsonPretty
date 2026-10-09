@@ -1,6 +1,7 @@
 export type Shortcut = {
     keys: string[]
     description: string
+    showPlus?: boolean
 }
 
 export type ShortcutGroup = {
@@ -13,20 +14,18 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
     {
         title: 'Ввод',
         items: [
-            { keys: ['"'], description: 'На выделении — обернуть его в кавычки' },
+            { keys: ['"', '{', '['], description: 'На выделении — обернуть его в символ', showPlus: false },
             { keys: ['Tab'], description: 'Отступ в два пробела; на выделении — сдвинуть блок' },
             { keys: ['Shift', 'Tab'], description: 'Убрать отступ' },
-            { keys: ['Enter'], description: 'Новая строка с автоотступом; между скобками — развернуть блок' },
             { keys: ['Ctrl', 'X'], description: 'Без выделения — вырезать строку' },
-            { keys: ['Ctrl', 'Z'], description: 'Отменить последнюю правку' }
         ]
     },
     {
-        title: 'Мультикурсор и сворачивание',
+        title: 'Мультикурсор',
         items: [
             { keys: ['Ctrl', 'D'], description: 'Выделить следующее вхождение того же текста' },
             { keys: ['Alt', 'клик'], description: 'Добавить ещё одну каретку' },
-            { keys: ['Средняя кнопка'], description: 'Протяжка — блочное выделение по столбцам'}
+            { keys: ['Средняя кнопка мыши'], description: 'Протяжка — блочное выделение по столбцам'}
         ]
     },
     {
@@ -37,5 +36,12 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
             { keys: ['Shift', 'Enter'], description: 'В строке поиска - Предыдущее совпадение' },
             { keys: ['Esc'], description: 'Закрыть поиск' }
         ]
-    }
+    },
+    {
+        title: 'Изменения',
+        items: [
+            { keys: ['Ctrl', 'Z'], description: 'Отменить последнюю правку' },
+            { keys: ['Ctrl', 'Y'], description: 'Вернуть последнюю правку' }
+        ]
+    },
 ]
