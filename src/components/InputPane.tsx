@@ -39,8 +39,9 @@ export default function InputPane({ value, onChange, onClear, onTemplate, mode, 
     const [query, setQuery] = useState('')
     const [activeIndex, setActiveIndex] = useState(0)
 
-    // Расширения собираем один раз: редактор создаётся тоже один раз
-    const extensions = useMemo(() => cmSetup(), [])
+    // Расширения собираем под выбранный диалект: в C# нет JSON-валидации,
+    // а редактор пересоздаётся при смене режима (key), чтобы сменить подсветку
+    const extensions = useMemo(() => cmSetup({ dialect: mode }), [mode])
     const matches = useMemo(() => findMatches(value, query), [value, query])
     const safeIndex = matches.length ? Math.min(activeIndex, matches.length - 1) : 0
 
@@ -162,6 +163,7 @@ export default function InputPane({ value, onChange, onClear, onTemplate, mode, 
 
             <div className="pane-body">
                 <CodeEditor
+                    key={mode}
                     className="cm-host"
                     value={value}
                     onChange={onChange}

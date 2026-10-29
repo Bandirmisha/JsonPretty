@@ -35,31 +35,36 @@ import {
 } from '@codemirror/view'
 import { writeClipboard } from './clipboard'
 import { findMatches } from './find'
-import { tokenizeJson } from './highlight'
+import { tokenizeCSharp, tokenizeJson, type Token } from './highlight'
 
-/* ---------- Подсветка JSON ----------
+/* ---------- Подсветка ввода ----------
    Разборщик наш: он расставляет классы j-key, j-str, j-num и т.д., а цвета для них
    заданы в темах через CSS-переменные. Поэтому 18 тем работают как раньше,
    и отдельная тема CodeMirror не нужна. */
 
-const jsonHighlight = ViewPlugin.fromClass(
-    class {
-        decorations: DecorationSet
+function highlightPlugin(tokenize: (text: string) => Token[]) {
+    return ViewPlugin.fromClass(
+        class {
+            decorations: DecorationSet
 
-        constructor(view: EditorView) {
-            this.decorations = tokenMarks(view)
-        }
+            constructor(view: EditorView) {
+                this.decorations = tokenMarks(view, tokenize)
+            }
 
-        update(update: ViewUpdate) {
-            if (update.docChanged) this.decorations = tokenMarks(update.view)
-        }
-    },
-    { decorations: (plugin) => plugin.decorations }
-)
+            update(update: ViewUpdate) {
+                if (update.docChanged) this.decorations = tokenMarks(update.view, tokenize)
+            }
+        },
+        { decorations: (plugin) => plugin.decorations }
+    )
+}
 
-function tokenMarks(view: EditorView): DecorationSet {
+const jsonHighlight = highlightPlugin(tokenizeJson)
+const csharpHighlight = highlightPlugin(tokenizeCSharp)
+
+function tokenMarks(view: EditorView, tokenize: (text: string) => Token[]): DecorationSet {
     const text = view.state.doc.toString()
-    const ranges: Range<Decoration>[] = tokenizeJson(text).map((token) =>
+    const ranges: Range<Decoration>[] = tokenize(text).map((token) =>
         Decoration.mark({ class: token.kind }).range(token.start, token.end)
     )
 
@@ -470,6 +475,8 @@ export type SetupOptions = {
     fold?: boolean
     /** Переносить длинные строки вместо горизонтальной прокрутки */
     wrap?: boolean
+    /** Диалект ввода: JSON — с разбором и ошибками, C# — только подсветка */
+    dialect?: 'json' | 'csharp'
 }
 
 /** Общий набор расширений для обеих панелей */
@@ -477,11 +484,14 @@ export function cmSetup({
     readOnly,
     lineNumbers: showLineNumbers = true,
     fold = true,
-    wrap
+    wrap,
+    dialect = 'json'
 }: SetupOptions = {}): Extension[] {
+    const isJson = dialect === 'json'
+
     const extensions: Extension[] = [
         // Сначала номер строки, сразу справа от него — стрелка сворачивания
-        ...(showLineNumbers ? [lineNumbers(), errorLines] : []),
+        ...(showLineNumbers ? [lineNumbers(), ...(isJson ? [errorLines] : [])] : []),
         ...(fold ? [foldGutter({ markerDOM: foldArrow })] : []),
         drawSelection(),
         // Мультикурсор: несколько выделений/кареток.
@@ -497,8 +507,7 @@ export function cmSetup({
         indentOnInput(),
         bracketMatching(),
         closeBrackets(),
-        json(),
-        jsonHighlight,
+        ...(isJson ? [json(), jsonHighlight] : [csharpHighlight]),
         searchField,
         searchHighlight,
         cutLineKeydown,
@@ -523,9 +532,13 @@ export function cmSetup({
     if (readOnly) {
         extensions.push(EditorState.readOnly.of(true))
     } else {
-        // Разбор ошибок JSON: строка с ошибкой подсвечивается в гаттере,
-        // а сама ошибка — волнистым подчёркиванием в тексте
-        extensions.push(history(), linter(jsonLinter, { delay: 250 }))
+        extensions.push(history())
+        if (isJson) {
+            // Разбор ошибок JSON: строка с ошибкой подсвечивается в гаттере,
+            // а сама ошибка — волнистым подчёркиванием в тексте.
+            // В режиме C# валидации нет: код C# — не JSON.
+            extensions.push(linter(jsonLinter, { delay: 250 }))
+        }
     }
 
     return extensions

@@ -1217,7 +1217,7 @@ select optgroup { background: var(--panel); color: var(--text); }
     white-space: nowrap;
 }
 
-/* ---------- Подсветка JSON ---------- */
+/* ---------- Подсветка ввода (JSON и C#) ---------- */
 
 .j-key { color: var(--key); }
 .j-str { color: var(--str); }
@@ -1225,6 +1225,7 @@ select optgroup { background: var(--panel); color: var(--text); }
 .j-bool { color: var(--bool); }
 .j-null { color: var(--null); }
 .j-punct { color: var(--punct); }
+.j-comment { color: var(--muted); font-style: italic; }
 
 ::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-track { background: transparent; }
