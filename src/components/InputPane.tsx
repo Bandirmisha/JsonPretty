@@ -7,7 +7,12 @@ import ClearButton from './ClearButton'
 import CodeEditor from './CodeEditor'
 import FindBar from './FindBar'
 
-const PLACEHOLDER = 'Вставьте JSON или строку с JSON'
+export type InputMode = 'json' | 'csharp'
+
+const PLACEHOLDERS: Record<InputMode, string> = {
+    json: 'Вставьте Json',
+    csharp: 'Вставьте C# код'
+}
 
 /**
  * Хоткей с буквой. event.key зависит от раскладки (на русской Ctrl+F даёт «а»),
@@ -21,11 +26,13 @@ type Props = {
     onChange: (value: string) => void
     onClear: () => void
     onTemplate: () => void
+    mode: InputMode
+    onModeChange: (mode: InputMode) => void
     /** Пока открыто модальное окно, хоткеи поля не работают */
     suspended?: boolean
 }
 
-export default function InputPane({ value, onChange, onClear, onTemplate, suspended }: Props) {
+export default function InputPane({ value, onChange, onClear, onTemplate, mode, onModeChange, suspended }: Props) {
     const viewRef = useRef<EditorView | null>(null)
 
     const [findOpen, setFindOpen] = useState(false)
@@ -33,7 +40,7 @@ export default function InputPane({ value, onChange, onClear, onTemplate, suspen
     const [activeIndex, setActiveIndex] = useState(0)
 
     // Расширения собираем один раз: редактор создаётся тоже один раз
-    const extensions = useMemo(() => cmSetup({ placeholder: PLACEHOLDER }), [])
+    const extensions = useMemo(() => cmSetup(), [])
     const matches = useMemo(() => findMatches(value, query), [value, query])
     const safeIndex = matches.length ? Math.min(activeIndex, matches.length - 1) : 0
 
@@ -123,12 +130,22 @@ export default function InputPane({ value, onChange, onClear, onTemplate, suspen
                     type="button"
                     className="soft-btn with-icon"
                     onClick={handleTemplate}
-                    title="Подставить шаблон JSON"
+                    title={mode === 'csharp' ? 'Подставить шаблон C#' : 'Подставить шаблон JSON'}
                 >
                     <Braces size={14} />
                     Шаблон
                 </button>
-                <span className="count">{value.length} симв.</span>
+                <label className="mode-select">
+                    <span className="sr-only">Формат ввода</span>
+                    <select
+                        value={mode}
+                        onChange={(event) => onModeChange(event.target.value as InputMode)}
+                        title="Формат ввода"
+                    >
+                        <option value="json">JSON</option>
+                        <option value="csharp">C#</option>
+                    </select>
+                </label>
             </div>
 
             {findOpen && (
@@ -150,6 +167,7 @@ export default function InputPane({ value, onChange, onClear, onTemplate, suspen
                     onChange={onChange}
                     onReady={handleReady}
                     extensions={extensions}
+                    placeholder={PLACEHOLDERS[mode]}
                 />
             </div>
         </section>

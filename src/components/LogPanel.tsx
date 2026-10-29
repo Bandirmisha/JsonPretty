@@ -3,12 +3,13 @@ import { ChevronRight } from 'lucide-react'
 import ClearButton from './ClearButton'
 import CopyButton from './CopyButton'
 
-export type LogAction = 'Pretty' | 'Minify'
+export type LogAction = 'Pretty' | 'Minify' | 'CSharp'
 
 /** Подписи действий для журнала: существительные, внутренние имена — латиницей. */
 const ACTION_LABELS: Record<LogAction, string> = {
     Pretty: 'Форматирование',
-    Minify: 'Сокращение'
+    Minify: 'Сокращение',
+    CSharp: 'C# → JSON'
 }
 
 export type LogEntry = {
@@ -62,8 +63,8 @@ export default function LogPanel({ entries, open, onToggle, onClear }: Props) {
                 <div className="log-body" ref={bodyRef}>
                     {entries.length === 0 ? (
                         <div className="log-empty">
-                            Журнал пуст. Здесь появятся операции «Форматирование» и «Сокращение» —
-                            с вводом и результатом.
+                            Журнал пуст. Здесь появятся операции «Форматирование», «Сокращение»
+                            и «C# → JSON» — с вводом и результатом.
                         </div>
                     ) : (
                         entries.map((entry) => (

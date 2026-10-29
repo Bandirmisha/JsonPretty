@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ActionBar from './components/ActionBar'
 import HelpDialog from './components/HelpDialog'
-import InputPane from './components/InputPane'
+import InputPane, { type InputMode } from './components/InputPane'
 import LogPanel, { type LogAction, type LogEntry } from './components/LogPanel'
 import OutputPane, { type OutputState } from './components/OutputPane'
 import ThemeSelect from './components/ThemeSelect'
 import TitleBar from './components/TitleBar'
 import { CircleHelp } from 'lucide-react'
+import { csharpToJson } from './lib/csharp'
 import { parseLoose, stringifyJson } from './lib/parseLoose'
-import { templateText } from './lib/template'
+import { csharpTemplateText, templateText } from './lib/template'
 import { loadTheme, saveTheme, type ThemeId } from './lib/themes'
 
 const MAX_LOG_ENTRIES = 100
@@ -22,6 +23,7 @@ function limit(text: string): string {
 
 export default function App() {
     const [input, setInput] = useState('')
+    const [mode, setMode] = useState<InputMode>('json')
     const [output, setOutput] = useState<OutputState | null>(null)
 
     const [theme, setTheme] = useState<ThemeId>(loadTheme)
@@ -60,12 +62,33 @@ export default function App() {
      */
     const applyFormat = useCallback(
         (indent: number) => {
-            const action: LogAction = indent === 0 ? 'Minify' : 'Pretty'
-
             if (!input.trim()) {
                 setOutput(null)
                 return
             }
+
+            if (mode === 'csharp') {
+                const action: LogAction = 'CSharp'
+
+                try {
+                    const value = csharpToJson(input)
+                    const text = stringifyJson(value, indent)
+
+                    setOutput({ variant: 'json', text, value })
+                    addLog({ action, ok: true, input: input.trim(), output: text })
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error)
+
+                    setOutput({
+                        variant: 'error',
+                        text: `Не удалось разобрать C#:\n${message}\n\n${input.trim()}`
+                    })
+                    addLog({ action, ok: false, input: input.trim(), output: message })
+                }
+                return
+            }
+
+            const action: LogAction = indent === 0 ? 'Minify' : 'Pretty'
 
             try {
                 const value = parseLoose(input)
@@ -83,7 +106,7 @@ export default function App() {
                 addLog({ action, ok: false, input: input.trim(), output: message })
             }
         },
-        [input, addLog]
+        [input, addLog, mode]
     )
 
     // Автоматический Pretty при любом изменении ввода — без искусственной задержки
@@ -97,8 +120,8 @@ export default function App() {
     }, [])
 
     const insertTemplate = useCallback(() => {
-        setInput(templateText())
-    }, [])
+        setInput(mode === 'csharp' ? csharpTemplateText() : templateText())
+    }, [mode])
 
     const toggleLog = useCallback(() => setLogOpen((open) => !open), [])
 
@@ -112,6 +135,8 @@ export default function App() {
                     onChange={setInput}
                     onClear={clear}
                     onTemplate={insertTemplate}
+                    mode={mode}
+                    onModeChange={setMode}
                     suspended={helpOpen}
                 />
                 <ActionBar

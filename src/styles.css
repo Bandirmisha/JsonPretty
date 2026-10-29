@@ -591,6 +591,34 @@ main {
     text-overflow: ellipsis;
 }
 
+/* Выбор формата ввода: компактный select в правом краю полосы */
+.pane-head .mode-select {
+    margin-left: auto;
+    flex: 0 0 auto;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.pane-head .mode-select select {
+    width: auto;
+    padding: 2px 6px;
+    font-size: 11.5px;
+    border-radius: 6px;
+}
+
+/* Скрытая подпись для screen reader */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .pane-body {
     flex: 1 1 auto;
     min-height: 0;
@@ -978,6 +1006,8 @@ select optgroup { background: var(--panel); color: var(--text); }
     display: flex;
     flex-direction: column;
     width: min(720px, 100%);
+    /* Высота фиксирована, чтобы окно не прыгало при переключении вкладок */
+    height: min(680px, 100%);
     max-height: 100%;
     background: var(--panel);
     border: 1px solid var(--border);
@@ -987,6 +1017,7 @@ select optgroup { background: var(--panel); color: var(--text); }
 }
 
 .help-head {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1002,11 +1033,60 @@ select optgroup { background: var(--panel); color: var(--text); }
     letter-spacing: .3px;
 }
 
+/* Переключение разделов справки: заметный сегментированный переключатель по центру */
+.help-tabs {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.help-tab {
+    width: auto;
+    padding: 5px 14px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.help-tab:hover {
+    background: var(--panel-3);
+}
+
+.help-tab.is-active {
+    color: var(--accent-text);
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.help-tab.is-active:hover {
+    background: var(--accent-hover);
+}
+
+.help-tab:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
 .help-head .spacer { margin-left: auto; }
 
 .help-head .icon-btn { margin-left: auto; }
 
 .help-body {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: auto;
     padding: 4px 16px 16px;
     user-select: text;
@@ -1021,6 +1101,17 @@ select optgroup { background: var(--panel); color: var(--text); }
     text-transform: uppercase;
     letter-spacing: .8px;
     color: var(--muted);
+}
+
+/* Заголовки форматов в «Принципе работы» — крупные, по центру, приглушённого цвета */
+.help-group-format h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted);
+    text-align: center;
 }
 
 .help-row {
@@ -1061,6 +1152,69 @@ select optgroup { background: var(--panel); color: var(--text); }
     font-size: 12.5px;
     line-height: 1.5;
     color: var(--text);
+}
+
+/* Пояснения «как работает»: текст и примеры кода */
+.help-note {
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+}
+
+.help-note h4 {
+    margin: 0 0 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.help-note p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text);
+}
+
+.help-code {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    font-family: Consolas, "Cascadia Mono", Menlo, monospace;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: auto;
+    white-space: pre;
+    user-select: text;
+}
+
+/* Перечисления в «Принципе работы» — списком, а не абзацем через точку с запятой */
+.help-list {
+    margin: 7px 0 0;
+    padding-left: 18px;
+}
+
+.help-list li {
+    margin: 3px 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text);
+}
+
+.help-list li::marker {
+    color: var(--muted);
+}
+
+.help-inline {
+    font-family: Consolas, "Cascadia Mono", Menlo, monospace;
+    font-size: 11.5px;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
 }
 
 /* ---------- Подсветка JSON ---------- */

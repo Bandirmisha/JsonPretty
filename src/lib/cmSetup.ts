@@ -29,7 +29,6 @@ import {
     keymap,
     lineNumberMarkers,
     lineNumbers,
-    placeholder as cmPlaceholder,
     rectangularSelection,
     type DecorationSet,
     type ViewUpdate
@@ -471,7 +470,6 @@ export type SetupOptions = {
     fold?: boolean
     /** Переносить длинные строки вместо горизонтальной прокрутки */
     wrap?: boolean
-    placeholder?: string
 }
 
 /** Общий набор расширений для обеих панелей */
@@ -479,8 +477,7 @@ export function cmSetup({
     readOnly,
     lineNumbers: showLineNumbers = true,
     fold = true,
-    wrap,
-    placeholder
+    wrap
 }: SetupOptions = {}): Extension[] {
     const extensions: Extension[] = [
         // Сначала номер строки, сразу справа от него — стрелка сворачивания
@@ -530,8 +527,6 @@ export function cmSetup({
         // а сама ошибка — волнистым подчёркиванием в тексте
         extensions.push(history(), linter(jsonLinter, { delay: 250 }))
     }
-
-    if (placeholder) extensions.push(cmPlaceholder(placeholder))
 
     return extensions
 }

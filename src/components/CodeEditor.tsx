@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { EditorState, type Extension } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
+import { Compartment, EditorState, type Extension } from '@codemirror/state'
+import { EditorView, placeholder as cmPlaceholder } from '@codemirror/view'
 
 type Props = {
     value: string
@@ -9,6 +9,8 @@ type Props = {
     onReady?: (view: EditorView) => void
     extensions: Extension[]
     className?: string
+    /** Подсказка в пустом поле; меняется без пересоздания редактора */
+    placeholder?: string
 }
 
 /**
@@ -18,13 +20,14 @@ type Props = {
  * историю правок, позицию каретки и выделение. Внешние изменения значения
  * (шаблон, стирание) переносятся в документ отдельным эффектом.
  */
-export default function CodeEditor({ value, onChange, onReady, extensions, className }: Props) {
+export default function CodeEditor({ value, onChange, onReady, extensions, className, placeholder }: Props) {
     const hostRef = useRef<HTMLDivElement>(null)
     const viewRef = useRef<EditorView | null>(null)
     /** Полный набор расширений с создания — нужен при пересоздании состояния */
     const configRef = useRef<Extension[] | null>(null)
     /** Последнее значение, которое редактор отдал наружу — чтобы не применять его обратно */
     const emittedRef = useRef<string | null>(null)
+    const placeholderCompartment = useRef(new Compartment()).current
 
     // Колбэки живут в ref: они приходят новыми на каждый рендер, а редактор — один
     const onChangeRef = useRef(onChange)
@@ -38,6 +41,9 @@ export default function CodeEditor({ value, onChange, onReady, extensions, class
 
         const config: Extension[] = [
             ...extensions,
+            placeholder
+                ? placeholderCompartment.of(cmPlaceholder(placeholder))
+                : placeholderCompartment.of([]),
             EditorView.updateListener.of((update) => {
                 if (!update.docChanged) return
 
@@ -89,6 +95,19 @@ export default function CodeEditor({ value, onChange, onReady, extensions, class
 
         return () => cancelAnimationFrame(frame)
     }, [value])
+
+    // Подсказка зависит от выбранного формата ввода, но редактор остаётся тем же.
+    // Обновляем и живое состояние, и сохранённый набор расширений: иначе после
+    // внешней замены текста (шаблон, очистка) вернулась бы старая подсказка.
+    useEffect(() => {
+        const next = placeholder ? cmPlaceholder(placeholder) : []
+        const config = configRef.current
+        if (config) config[extensions.length] = placeholderCompartment.of(next)
+
+        viewRef.current?.dispatch({
+            effects: placeholderCompartment.reconfigure(next)
+        })
+    }, [placeholder, placeholderCompartment, extensions.length])
 
     return <div className={className} ref={hostRef} />
 }
