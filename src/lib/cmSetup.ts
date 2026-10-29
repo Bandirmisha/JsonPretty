@@ -244,9 +244,11 @@ function dedentCommand(view: EditorView): boolean {
 }
 
 /**
- * Backspace: целый отступ перед кареткой стирается за один шаг, но не уходит
- * за начало строки. Пустую пару символов удаляет команда автопар (она следующая
- * в раскладке), поэтому сюда она не попадает: перед кареткой там не пробел.
+ * Backspace: целый отступ перед кареткой стирается за один шаг. Если этим
+ * отступом начинается строка, то вместе с ним стирается и перенос строки —
+ * каретка перепрыгивает в конец верхней строки. Пустую пару символов удаляет
+ * команда автопар (она следующая в раскладке), поэтому сюда она не попадает:
+ * перед кареткой там не пробел.
  */
 function backspaceIndentCommand(view: EditorView): boolean {
     const { state } = view
@@ -260,10 +262,22 @@ function backspaceIndentCommand(view: EditorView): boolean {
         const run = /[ \t]+$/.exec(state.sliceDoc(line.from, range.from))
         if (!run) return { range }
 
+        const from = range.from - run[0].length
         touched = true
+
+        // Пробелы упираются в начало строки: убираем ещё и перенос,
+        // чтобы каретка встала в конец предыдущей строки
+        if (from === line.from && line.number > 1) {
+            const prev = state.doc.line(line.number - 1)
+            return {
+                changes: { from: prev.to, to: range.from },
+                range: EditorSelection.cursor(prev.to)
+            }
+        }
+
         return {
-            changes: { from: range.from - run[0].length, to: range.from },
-            range: EditorSelection.cursor(range.from - run[0].length)
+            changes: { from, to: range.from },
+            range: EditorSelection.cursor(from)
         }
     })
 

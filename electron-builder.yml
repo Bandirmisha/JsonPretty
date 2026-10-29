@@ -30,8 +30,9 @@ compression: maximum
 npmRebuild: false
 
 win:
-  # Иконка .exe и установщика: electron-builder сам делает из неё .ico
-  icon: src/assets/icon.png
+  # Иконка .exe и установщика — готовый .ico (buildResources).
+  # Готовый файл используется напрямую, без png→ico конвертации при сборке.
+  icon: build/icon.ico
   target:
     - target: nsis
       arch:
